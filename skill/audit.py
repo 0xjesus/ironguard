@@ -234,9 +234,19 @@ def main():
     out_dir = os.path.expanduser(sys.argv[2] if len(sys.argv) > 2 else "~/ironguard")
     os.makedirs(out_dir, exist_ok=True)
     def is_repo(d):
+        # A directory counts as a repo if it's a git repo OR contains a dependency
+        # manifest anywhere within a few levels (handles nested/monorepo layouts).
         if os.path.isdir(os.path.join(d, ".git")):
             return True
-        return any(os.path.exists(os.path.join(d, m)) for m in MANIFESTS)
+        base = d.rstrip("/").count(os.sep)
+        for dp, dirs, files in os.walk(d):
+            if dp.count(os.sep) - base > 4:
+                dirs[:] = []
+                continue
+            dirs[:] = [x for x in dirs if x not in SKIP_DIRS]
+            if any(f in MANIFESTS for f in files):
+                return True
+        return False
 
     children = [os.path.join(root, d) for d in sorted(os.listdir(root))
                 if os.path.isdir(os.path.join(root, d)) and d not in SKIP_DIRS]

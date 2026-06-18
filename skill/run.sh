@@ -33,7 +33,7 @@ else
 fi
 
 echo "==> Installing cron entry (every $INTERVAL_MIN min)"
-CRON_LINE="*/$INTERVAL_MIN * * * * cd '$OUT' && /usr/bin/env python3 audit.py '$WORKSPACE' '$OUT' >> '$OUT/cron.log' 2>&1 # ironguard"
+CRON_LINE="*/$INTERVAL_MIN * * * * cd '$OUT' && IRONGUARD_AI=0 /usr/bin/env python3 audit.py '$WORKSPACE' '$OUT' >> '$OUT/cron.log' 2>&1 # ironguard"
 if command -v crontab >/dev/null 2>&1; then
   ( crontab -l 2>/dev/null | grep -v '# ironguard'; echo "$CRON_LINE" ) | crontab - \
     && echo "    cron installed" \
