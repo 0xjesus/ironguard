@@ -77,29 +77,28 @@ Your secrets and code never leave your machine in the clear. You can prove it:
 
 ## Quickstart
 
-> Requires: Rust ≥ 1.92 (for the IronClaw build), `cargo-component`, Python 3, and an IronClaw Reborn checkout. NEAR AI API key in `~/.nearai-env` (`export NEARAI_API_KEY="..."`).
+> Requires only **Python 3**. A NEAR AI key in `~/.nearai-env` (`export NEARAI_API_KEY="..."`) enables the optional LLM code scan; without it the secret + OSV dependency audit still runs.
 
-### 1. Build & install the WASM tool into IronClaw
+### Install — one command
 ```bash
-# inside your ironclaw checkout, after applying the patch below:
-cp -r ironguard/tool  ironclaw/tools-src/ironguard
-bash ironclaw/tools-src/ironguard/install.sh     # build + install + activate ironguard.scan
+git clone https://github.com/0xjesus/ironguard && bash ironguard/install.sh ~/code
+# → IronGuard is live ▶ http://127.0.0.1:8787   (watching ~/code every 5 min)
+```
+That single command installs the auditor, **registers the `ironguard` IronClaw skill into any IronClaw home it finds**, runs an initial scan, starts the dashboard, and installs a 5-minute cron. **No binary patch, no special profile, no manual config** — the auditor is plain Python that calls OSV.dev (and optionally NEAR AI) directly, so it runs on a **vanilla IronClaw** (or standalone). Set `IRONGUARD_AI=1` to include the LLM code scan on the initial run.
+
+Then drive it from the IronClaw chat — *"audit ~/code with ironguard"* — or just open the dashboard.
+
+### Standalone (no IronClaw at all)
+```bash
+python3 ironguard/skill/audit.py ~/code     # secrets + OSV deps + (optional) AI code scan → SQLite
+python3 ironguard/skill/serve.py             # dashboard at :8787
 ```
 
-### 2. Install the skill
-Copy `skill/SKILL.md` into your agent's skills dir (`<reborn-home>/local-dev/tenants/default/users/<owner>/skills/ironguard/SKILL.md`).
-
-### 3. Run the always-on auditor
-```bash
-bash skill/run.sh ~/code      # initial audit + dashboard server + cron (every 5 min)
-# → IronGuard is live ▶ http://127.0.0.1:8787
-```
-
-Or one-shot, no IronClaw needed (the deterministic engine + AI analysis are standalone Python):
-```bash
-python3 skill/audit.py ~/code        # writes SQLite + report.js
-python3 skill/serve.py               # serves the dashboard at :8787
-```
+### Advanced — the sandboxed WASM tool (upstream contribution)
+`ironguard.scan` runs the OSV audit **inside IronClaw's WASM sandbox**. It depends on the core
+**egress fix** in [`patches/`](patches/) being merged (see below) — so it's offered as an upstream
+contribution, **not required** for the one-command install above. Build (Rust ≥ 1.92 + `cargo-component`,
+patch applied): `bash tool/install.sh` inside an IronClaw checkout.
 
 ---
 

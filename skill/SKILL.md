@@ -38,14 +38,14 @@ command** — you do **not** inspect the workspace yourself.
 
 **Step 1 — make EXACTLY ONE `shell` call** (substitute `<PATH>`):
 ```
-python3 "$HOME/ironguard/audit.py" "<PATH>"
+python3 "__IRONGUARD_HOME__/audit.py" "<PATH>"
 ```
 This one command scans every repo for secrets, audits dependencies against OSV.dev, runs the LLM
 code analysis, writes SQLite history, and updates the dashboard. For a very large tree, prefix
 `IRONGUARD_AI=0` to skip the slower LLM pass. If it errors that `audit.py` is missing, tell the
 user to run `ironguard/skill/run.sh <PATH>` once, then retry.
 
-**Step 2 — read the result once:** `read_file` on `$HOME/ironguard/report.json`.
+**Step 2 — read the result once:** `read_file` on `__IRONGUARD_HOME__/report.json`.
 
 **Step 3 — report:** worst-risk repo first, then per repo the `risk` and the concrete findings —
 masked secrets, vulnerable/malicious dependencies (call out `malicious: true`), and AI code

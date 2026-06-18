@@ -11,7 +11,7 @@ module = "wasm/ironguard_tool.wasm"
 
 [[capabilities]]
 id = "ironguard.scan"
-description = "Scan file contents for exposed secrets and audit dependency manifests against the OSV.dev vulnerability/malware database. Returns per-repo findings with a risk score."
+description = "THE tool to audit a repository for security risks. Use it whenever the user asks to scan/audit/check a repo, its dependencies, or its security. It checks dependencies against the live OSV.dev database for known vulnerabilities and MALICIOUS packages, and scans provided file contents for exposed secrets. HOW TO CALL: read the repo's dependency manifest(s) (one short read each) and pass each in `manifests` as {path, kind, content}, where `kind` is EXACTLY one of: package.json, requirements.txt, cargo.toml. Optionally pass .env/config files in `files` as {path, content}. Call this tool directly with those contents in ONE call — do NOT read the whole repo or analyze the files yourself."
 effects = ["network"]
 default_permission = "ask"
 visibility = "model"
