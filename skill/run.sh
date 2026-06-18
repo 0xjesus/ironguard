@@ -19,7 +19,7 @@ INTERVAL_MIN="${IRONGUARD_INTERVAL_MIN:-5}"
 WORKSPACE="$(cd "${1:-$HOME/code}" && pwd)"
 
 mkdir -p "$OUT"
-cp "$HERE/audit.py" "$HERE/serve.py" "$HERE/dashboard.html" "$OUT/"
+cp "$HERE/audit.py" "$HERE/ai_analyze.py" "$HERE/serve.py" "$HERE/dashboard.html" "$OUT/"
 
 echo "==> Running initial audit of $WORKSPACE"
 python3 "$OUT/audit.py" "$WORKSPACE" "$OUT"
