@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "ScanParams",
+  "properties": {
+    "repo": {
+      "type": "string",
+      "description": "Repository name or path, used to label the report."
+    },
+    "files": {
+      "type": "array",
+      "description": "Files to scan for exposed secrets (e.g. .env, config files). The skill reads them read-only and passes their contents here.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "content": { "type": "string" }
+        },
+        "required": ["path", "content"]
+      }
+    },
+    "manifests": {
+      "type": "array",
+      "description": "Dependency manifests to audit against OSV.dev.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "kind": {
+            "type": "string",
+            "enum": ["package.json", "requirements.txt", "cargo.toml"],
+            "description": "Manifest type; inferred from path when omitted."
+          },
+          "content": { "type": "string" }
+        },
+        "required": ["path", "content"]
+      }
+    }
+  }
+}

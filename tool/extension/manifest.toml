@@ -1,0 +1,21 @@
+schema_version = "reborn.extension_manifest.v2"
+id = "ironguard"
+name = "IronGuard"
+version = "0.1.0"
+description = "Read-only repository security auditor: scans file content for exposed secrets and audits dependencies against OSV.dev. (spike build)"
+trust = "untrusted"
+
+[runtime]
+kind = "wasm"
+module = "wasm/ironguard_tool.wasm"
+
+[[capabilities]]
+id = "ironguard.scan"
+description = "Scan file contents for exposed secrets and audit dependency manifests against the OSV.dev vulnerability/malware database. Returns per-repo findings with a risk score."
+effects = ["network"]
+default_permission = "ask"
+visibility = "model"
+input_schema_ref = "schemas/ironguard/scan.input.v1.json"
+output_schema_ref = "schemas/ironguard/scan.output.v1.json"
+prompt_doc_ref = "prompts/ironguard/scan.md"
+required_host_ports = ["host.runtime.http_egress"]

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>IronGuard — Workspace Security</title>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#11161f; --panel-2:#161c28; --line:#1f2735;
+    --txt:#e6edf3; --muted:#8b97a7; --accent:#5eead4;
+    --low:#3fb950; --medium:#d29922; --high:#f0883e; --critical:#f85149;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#13203a 0%,var(--bg) 55%);
+       color:var(--txt);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+       -webkit-font-smoothing:antialiased;padding:32px 20px 80px}
+  .wrap{max-width:1040px;margin:0 auto}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+  .logo{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
+        background:linear-gradient(140deg,#102538,#0b1722);border:1px solid #244a63;font-size:21px}
+  h1{font-size:22px;margin:0;letter-spacing:.3px}
+  h1 .g{color:var(--accent)}
+  .sub{color:var(--muted);font-size:13px;margin:2px 0 6px}
+  .sub code{color:var(--accent);background:var(--panel-2);padding:1px 6px;border-radius:6px}
+  #status{margin:0 0 22px;font-size:12.5px}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--low);
+       margin-right:6px;box-shadow:0 0 7px var(--low);animation:pulse 1.8s infinite;vertical-align:middle}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .n{font-size:26px;font-weight:700}
+  .stat .l{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.6px}
+  .stat.bad .n{color:var(--critical)} .stat.warn .n{color:var(--high)}
+  .htitle{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;margin:6px 0 6px}
+  #history{display:flex;align-items:flex-end;gap:3px;height:50px;margin-bottom:26px}
+  .hbar{flex:1;max-width:14px;border-radius:2px 2px 0 0;background:var(--line);min-height:3px;cursor:default}
+  .hbar.low{background:var(--low)} .hbar.medium{background:var(--medium)}
+  .hbar.high{background:var(--high)} .hbar.critical{background:var(--critical)}
+  .repo{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin-bottom:14px;overflow:hidden}
+  .repo-head{display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;user-select:none}
+  .repo-head:hover{background:var(--panel-2)}
+  .repo-name{font-weight:650;font-size:16px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .repo-path{color:var(--muted);font-size:12px;font-weight:400}
+  .badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:4px 10px;border-radius:999px;border:1px solid}
+  .b-low{color:var(--low);border-color:#13351f;background:#0e2417}
+  .b-medium{color:var(--medium);border-color:#3a2f12;background:#241d0c}
+  .b-high{color:var(--high);border-color:#3d2a14;background:#26190d}
+  .b-critical{color:var(--critical);border-color:#42191b;background:#2a1113}
+  .pill{font-size:12px;color:var(--muted);background:var(--panel-2);border:1px solid var(--line);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .pill.danger b{color:var(--critical)} .pill b{color:var(--txt)}
+  .body{display:none;padding:4px 18px 18px;border-top:1px solid var(--line)}
+  .repo.open .body{display:block} .repo.open .chev{transform:rotate(90deg)}
+  .chev{color:var(--muted);transition:transform .15s}
+  h3{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:18px 0 8px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  td,th{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+  .sev{font-weight:700} .sev.critical{color:var(--critical)} .sev.high{color:var(--high)}
+  .sev.medium{color:var(--medium)} .sev.low{color:var(--low)}
+  .mal{color:var(--critical);font-weight:700}
+  a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+  .none{color:var(--low)} .empty{color:var(--muted);padding:10px 0}
+  footer{color:var(--muted);font-size:12px;margin-top:30px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">🛡️</div>
+    <div><h1>Iron<span class="g">Guard</span></h1></div>
+  </header>
+  <div class="sub" id="sub">Read-only workspace security audit · secrets &amp; OSV dependency vulnerabilities</div>
+  <div id="status"></div>
+  <div class="stats" id="stats"></div>
+  <div class="htitle">Recent scans</div>
+  <div id="history"></div>
+  <div id="repos"></div>
+  <footer>Read-only. Secrets masked. Dependency data from <a href="https://osv.dev" target="_blank" rel="noopener">OSV.dev</a>. IronGuard for IronClaw.</footer>
+</div>
+
+<script src="report.js"></script>
+<script>
+(function(){
+  const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const order = {critical:3,high:2,medium:1,low:0};
+  const riskOf = r => {
+    if(r.risk) return r.risk;
+    const wc=(r.code_vulnerabilities||[]).reduce((m,c)=>Math.max(m,order[c.severity]||0),0);
+    const s=(r.secrets||[]).reduce((m,x)=>Math.max(m,order[x.severity]||0),0);
+    if((r.vulnerabilities||[]).some(v=>v.malicious)||wc===3||s===3) return "critical";
+    if((r.vulnerabilities||[]).length||(r.code_vulnerabilities||[]).length||s===2||wc===2) return "high";
+    if(s===1||wc===1) return "medium"; return "low";
+  };
+  const osv = id => /^[A-Z0-9-]+$/.test(id)
+    ? '<a href="https://osv.dev/vulnerability/'+esc(id)+'" target="_blank" rel="noopener"><code>'+esc(id)+'</code></a>'
+    : '<code>'+esc(id)+'</code>';
+
+  async function getData(){
+    try{
+      const r = await fetch('/api/latest',{cache:'no-store'});
+      if(r.ok){ const j = await r.json(); if(j && j.repos!==undefined) return {R:j, live:true}; }
+    }catch(e){}
+    return {R: window.REPORT || {repos:[],summary:{},history:[]}, live:false};
+  }
+
+  function render(R, live){
+    const repos = (R.repos||[]).map(r=>({...r,_risk:riskOf(r)}))
+                   .sort((a,b)=>order[b._risk]-order[a._risk]);
+    const totSecrets = repos.reduce((n,r)=>n+(r.secrets||[]).length,0);
+    const totVuln = repos.reduce((n,r)=>n+(r.vulnerabilities||[]).length,0);
+    const totMal = repos.reduce((n,r)=>n+(r.vulnerabilities||[]).filter(v=>v.malicious).length,0);
+    const totCode = repos.reduce((n,r)=>n+(r.code_vulnerabilities||[]).length,0);
+
+    document.getElementById('sub').innerHTML = R.root
+      ? 'Read-only audit of <code>'+esc(R.root)+'</code> · secrets &amp; OSV dependency vulnerabilities'
+      : 'Read-only workspace security audit · secrets &amp; OSV dependency vulnerabilities';
+
+    const when = R.generated_at ? new Date(R.generated_at).toLocaleString() : '—';
+    document.getElementById('status').innerHTML =
+      (live ? '<span class="dot"></span>LIVE · ' : '') +
+      'Last scan: <b>'+esc(when)+'</b>' + (live ? ' · auto-refresh 15s' : ' · static file');
+
+    document.getElementById('stats').innerHTML = [
+      ['Repositories', repos.length, ''],
+      ['Secrets exposed', totSecrets, totSecrets?'bad':''],
+      ['Vulnerable deps', totVuln, totVuln?'warn':''],
+      ['Malicious deps', totMal, totMal?'bad':''],
+      ['Code vulns (AI)', totCode, totCode?'bad':''],
+    ].map(([l,n,c])=>'<div class="stat '+c+'"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>').join('');
+
+    const hist = R.history||[];
+    const maxH = Math.max(1, ...hist.map(h=>(h.secrets||0)+(h.vulnerable_deps||0)));
+    document.getElementById('history').innerHTML = hist.length
+      ? hist.map(h=>{
+          const tot=(h.secrets||0)+(h.vulnerable_deps||0);
+          const cls = h.malicious_deps>0?'critical':(h.vulnerable_deps>0?'high':(h.secrets>0?'medium':'low'));
+          const ht = 3 + Math.round(44*tot/maxH);
+          return '<div class="hbar '+cls+'" style="height:'+ht+'px" title="'+esc(h.ts||'')+' — '+(h.secrets||0)+' secrets, '+(h.vulnerable_deps||0)+' vuln, '+(h.malicious_deps||0)+' malware"></div>';
+        }).join('')
+      : '<div class="empty">No scan history yet.</div>';
+
+    document.getElementById('repos').innerHTML = repos.length ? repos.map(r=>{
+      const secrets=r.secrets||[], vulns=r.vulnerabilities||[], code=r.code_vulnerabilities||[], mal=vulns.filter(v=>v.malicious).length;
+      const secTbl = secrets.length
+        ? '<h3>Exposed secrets ('+secrets.length+')</h3><table><tr><th>Severity</th><th>Kind</th><th>Location</th><th>Preview</th></tr>'+
+          secrets.map(s=>'<tr><td class="sev '+esc(s.severity)+'">'+esc(s.severity)+'</td><td>'+esc(s.kind)+'</td><td><code>'+esc(s.path)+(s.line?':'+esc(s.line):'')+'</code></td><td><code>'+esc(s.preview)+'</code></td></tr>').join('')+'</table>'
+        : '<h3>Exposed secrets</h3><div class="none">None found ✓</div>';
+      const vTbl = vulns.length
+        ? '<h3>Vulnerable dependencies ('+vulns.length+')</h3><table><tr><th>Package</th><th>Version</th><th>Advisories</th></tr>'+
+          vulns.map(v=>'<tr><td>'+(v.malicious?'<span class="mal">⚠ '+esc(v.name)+'</span>':esc(v.name))+' <span class="repo-path">'+esc(v.ecosystem)+'</span>'+(v.malicious?' <span class="badge b-critical">malware</span>':'')+'</td><td><code>'+esc(v.version)+'</code></td><td>'+(v.advisory_ids||[]).map(osv).join(' ')+'</td></tr>').join('')+'</table>'
+        : '<h3>Vulnerable dependencies</h3><div class="none">None found ✓</div>';
+      const codeTbl = code.length
+        ? '<h3>AI-detected code vulnerabilities ('+code.length+')</h3><table><tr><th>Severity</th><th>Type</th><th>Location</th><th>Issue &amp; fix</th></tr>'+
+          code.map(c=>'<tr><td class="sev '+esc(c.severity)+'">'+esc(c.severity)+'</td><td>'+esc(c.type||'')+'</td><td><code>'+esc(c.path||'')+(c.line?':'+esc(c.line):'')+'</code></td><td><b>'+esc(c.title||'')+'</b>'+(c.explanation?'<div class="repo-path">'+esc(c.explanation)+'</div>':'')+(c.recommendation?'<div class="repo-path">↳ '+esc(c.recommendation)+'</div>':'')+'</td></tr>').join('')+'</table>'
+        : '';
+      return '<div class="repo">'+
+        '<div class="repo-head" onclick="this.parentNode.classList.toggle(\'open\')">'+
+          '<span class="chev">▶</span>'+
+          '<span class="repo-name">'+esc(r.name)+' <span class="repo-path">'+esc(r.root||'')+'</span></span>'+
+          '<span class="pill '+(secrets.length?'danger':'')+'">'+secrets.length+' secrets</span>'+
+          '<span class="pill '+(mal?'danger':'')+'">'+vulns.length+' vuln'+(mal?' · '+mal+' malware':'')+'</span>'+
+          '<span class="pill '+(code.length?'danger':'')+'">'+code.length+' code</span>'+
+          '<span class="badge b-'+r._risk+'">'+r._risk+'</span>'+
+        '</div><div class="body">'+secTbl+vTbl+codeTbl+'</div></div>';
+    }).join('') : '<div class="empty">No report yet. Run an IronGuard audit to populate the dashboard.</div>';
+    const f=document.querySelector('.repo'); if(f) f.classList.add('open');
+  }
+
+  async function load(){ const {R,live} = await getData(); render(R,live); }
+  load(); setInterval(load, 15000);
+})();
+</script>
+</body>
+</html>

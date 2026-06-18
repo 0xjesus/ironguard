@@ -1,0 +1,25 @@
+{
+  "version": "0.1.0",
+  "wit_version": "0.3.0",
+  "description": "IronGuard — read-only security auditor. Scans file contents for exposed secrets (API keys, tokens, private keys) and audits dependency manifests against the OSV.dev vulnerability and malware database. No credentials required.",
+  "capabilities": {
+    "http": {
+      "allowlist": [
+        {
+          "host": "api.osv.dev",
+          "path_prefix": "/v1/querybatch",
+          "methods": ["POST"]
+        },
+        {
+          "host": "api.osv.dev",
+          "path_prefix": "/v1/query",
+          "methods": ["POST"]
+        }
+      ],
+      "rate_limit": {
+        "requests_per_minute": 60,
+        "requests_per_hour": 1000
+      }
+    }
+  }
+}

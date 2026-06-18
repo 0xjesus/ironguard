@@ -1,0 +1,27 @@
+diff --git a/crates/ironclaw_reborn_composition/src/runtime/local_dev/extension_surface.rs b/crates/ironclaw_reborn_composition/src/runtime/local_dev/extension_surface.rs
+index e3da9a9..da74153 100644
+--- a/crates/ironclaw_reborn_composition/src/runtime/local_dev/extension_surface.rs
++++ b/crates/ironclaw_reborn_composition/src/runtime/local_dev/extension_surface.rs
+@@ -178,6 +178,22 @@ fn extension_network_policy(capability: &ActiveExtensionCapability) -> NetworkPo
+             port: None,
+         });
+     }
++    // Local-dev fallback: a network-declaring extension capability with no
++    // per-credential audience (e.g. a custom WASM tool that calls a public API
++    // such as OSV.dev) still needs a non-empty allowlist. Without one, the
++    // host's network obligation validation rejects the empty-but-constrained
++    // policy and the tool cannot execute at all. Grant a broad allowlist scoped
++    // to local-dev; private/metadata/loopback IP ranges stay blocked via
++    // deny_private_ip_ranges. Extensions that carry credential audiences
++    // (gmail, exa web search, ...) already populated `targets` above and are
++    // unaffected by this branch.
++    if targets.is_empty() && capability.effects.contains(&EffectKind::Network) {
++        targets.push(NetworkTargetPattern {
++            scheme: None,
++            host_pattern: "*".to_string(),
++            port: None,
++        });
++    }
+     NetworkPolicy {
+         allowed_targets: targets,
+         deny_private_ip_ranges: true,

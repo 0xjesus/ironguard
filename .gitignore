@@ -1,0 +1,25 @@
+# Rust / WASM build artifacts
+target/
+**/target/
+Cargo.lock
+
+# Python
+__pycache__/
+*.pyc
+
+# IronGuard runtime output (local audit data — never commit)
+ironguard.db
+report.js
+report.json
+serve.log
+cron.log
+submissions-*/
+
+# Secrets (never commit)
+.nearai-env
+.env
+*.key
+*.pem
+
+# OS
+.DS_Store
