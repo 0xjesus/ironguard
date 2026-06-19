@@ -1,0 +1,26 @@
+diff --git a/crates/ironclaw_reborn_composition/src/projection/display_preview.rs b/crates/ironclaw_reborn_composition/src/projection/display_preview.rs
+index f65bfdb..c45fa88 100644
+--- a/crates/ironclaw_reborn_composition/src/projection/display_preview.rs
++++ b/crates/ironclaw_reborn_composition/src/projection/display_preview.rs
+@@ -421,10 +421,17 @@ fn input_summary(capability_id: &str, value: &serde_json::Value) -> Option<Capab
+ }
+ 
+ fn safe_capability_title(capability_id: &str) -> &str {
+-    capability_id
+-        .rsplit_once('.')
+-        .map(|(_, suffix)| suffix)
+-        .unwrap_or(capability_id)
++    // Builtins are shown by their short method name (`builtin.read_file` -> `read_file`)
++    // so the activity stays readable. Custom extension capabilities (e.g. `ironguard.scan`)
++    // keep their full id so the tool is clearly attributed to its extension.
++    if capability_id.starts_with("builtin.") {
++        capability_id
++            .rsplit_once('.')
++            .map(|(_, suffix)| suffix)
++            .unwrap_or(capability_id)
++    } else {
++        capability_id
++    }
+ }
+ 
+ fn safe_path_subtitle(value: &serde_json::Value) -> Option<String> {
