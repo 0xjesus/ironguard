@@ -1,6 +1,6 @@
 ---
 name: "ironguard"
-version: "0.4.2"
+version: "0.5.0"
 description: "Audit a repository for security risks using the ironguard.scan tool: vulnerable & malicious dependencies (OSV.dev) and exposed secrets. Use whenever the user asks to audit/scan/check a repo, its dependencies, or its security."
 tags: ["security", "audit", "secrets", "dependencies", "supply-chain", "osv", "malware"]
 activation:
@@ -53,10 +53,25 @@ packages) and scans provided file contents for exposed secrets.
 **Rules:** Use the `ironguard.scan` tool to do the analysis — do NOT inspect or judge dependencies
 yourself. Read only the dependency manifest; never read `.env`/secret files or the whole repository.
 
-## Continuous / whole-workspace audit (optional)
-`ironguard.scan` audits one repo's dependencies. For an always-on, recursive, multi-repo audit with
-a live dashboard (secrets + OSV + LLM code analysis, persisted to SQLite), the bundled engine runs
-on a cron — installed by `install.sh`. To trigger a full workspace scan on demand, run via the
-`shell` tool: `python3 __IRONGUARD_HOME__/audit.py <workspace>` — then point the user at the
-dashboard at `http://127.0.0.1:8787`. For a single repo's dependencies, prefer the `ironguard.scan`
-tool above.
+## Method: watch_workspace (always-on cron monitoring)
+
+When the user asks to **continuously scan / keep monitoring / set up the cron / always-on audit /
+"keep an eye on" / "scan every few minutes"** a workspace, set up the background watcher with **one
+`shell` command**:
+
+- Default — fast & free (deterministic: secrets + OSV dependency/malware):
+  ```
+  bash __IRONGUARD_HOME__/watch.sh "<workspace>"
+  ```
+- If the user wants the **AI code-vulnerability layer too** (injection, SSRF, auth bypass, … via the
+  LLM on NEAR's confidential TEE — uses NEAR AI credits), add `ai`:
+  ```
+  bash __IRONGUARD_HOME__/watch.sh "<workspace>" ai
+  ```
+
+This installs a 5-minute cron, (re)starts the dashboard, and runs an initial recursive scan of every
+repo (secrets + OSV + optional AI code analysis), persisted to SQLite. After it returns, tell the
+user: *"\<workspace\> is now continuously audited every 5 minutes — the live dashboard (with full
+scan history and masked secrets) is at **http://127.0.0.1:8787**."*
+
+For a quick one-repo dependency check (no cron), use the `ironguard.scan` tool above instead.

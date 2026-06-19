@@ -33,7 +33,8 @@ fi
 
 echo "==> Installing IronGuard auditor to $OUT"
 mkdir -p "$OUT"
-cp "$SRC/audit.py" "$SRC/ai_analyze.py" "$SRC/serve.py" "$SRC/dashboard.html" "$OUT/"
+cp "$SRC/audit.py" "$SRC/ai_analyze.py" "$SRC/serve.py" "$SRC/dashboard.html" "$SRC/watch.sh" "$OUT/"
+chmod +x "$OUT/watch.sh" 2>/dev/null || true
 
 # --- Register the IronClaw skill into every IronClaw home we can find (best-effort) ---
 echo "==> Registering the IronClaw 'ironguard' skill (best-effort)"
@@ -68,7 +69,8 @@ fi
 
 # --- Cron (always-on) ---
 echo "==> Installing cron (every $INTERVAL_MIN min)"
-CRON="*/$INTERVAL_MIN * * * * cd '$OUT' && IRONGUARD_AI=0 python3 audit.py '$WORKSPACE' '$OUT' >> '$OUT/cron.log' 2>&1 # ironguard"
+CRON_AI="${IRONGUARD_AI:-0}"   # set IRONGUARD_AI=1 to include the LLM code scan in the recurring cron
+CRON="*/$INTERVAL_MIN * * * * cd '$OUT' && IRONGUARD_AI=$CRON_AI python3 audit.py '$WORKSPACE' '$OUT' >> '$OUT/cron.log' 2>&1 # ironguard"
 if command -v crontab >/dev/null 2>&1; then
   ( crontab -l 2>/dev/null | grep -v '# ironguard'; echo "$CRON" ) | crontab - \
     && echo "    installed" \
