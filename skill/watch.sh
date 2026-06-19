@@ -15,7 +15,18 @@ OUT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"     # the IronGuard runtime 
 PORT="${IRONGUARD_PORT:-8787}"
 MIN="${IRONGUARD_INTERVAL_MIN:-5}"
 
-if [ $# -lt 1 ]; then echo "usage: bash watch.sh <WORKSPACE> [ai]" >&2; exit 1; fi
+# stop: remove the recurring cron and stop the dashboard server (scan history is kept in SQLite).
+if [ "${1:-}" = "stop" ]; then
+  if command -v crontab >/dev/null 2>&1; then
+    ( crontab -l 2>/dev/null | grep -v '# ironguard' ) | crontab - 2>/dev/null || true
+  fi
+  lsof -ti "tcp:$PORT" 2>/dev/null | xargs -r kill 2>/dev/null || true
+  echo "🛑 IronGuard stopped: the 5-min cron was removed and the dashboard server on :$PORT was stopped."
+  echo "   Scan history stays in the SQLite DB. Restart anytime: bash $OUT/watch.sh <workspace> [ai]"
+  exit 0
+fi
+
+if [ $# -lt 1 ]; then echo "usage: bash watch.sh <WORKSPACE> [ai]   |   bash watch.sh stop" >&2; exit 1; fi
 WS="$(cd "$1" 2>/dev/null && pwd || true)"
 if [ -z "$WS" ]; then echo "error: workspace '$1' not found" >&2; exit 1; fi
 

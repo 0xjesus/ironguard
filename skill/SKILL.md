@@ -1,6 +1,6 @@
 ---
 name: "ironguard"
-version: "0.5.0"
+version: "0.5.1"
 description: "Audit a repository for security risks using the ironguard.scan tool: vulnerable & malicious dependencies (OSV.dev) and exposed secrets. Use whenever the user asks to audit/scan/check a repo, its dependencies, or its security."
 tags: ["security", "audit", "secrets", "dependencies", "supply-chain", "osv", "malware"]
 activation:
@@ -75,3 +75,15 @@ user: *"\<workspace\> is now continuously audited every 5 minutes — the live d
 scan history and masked secrets) is at **http://127.0.0.1:8787**."*
 
 For a quick one-repo dependency check (no cron), use the `ironguard.scan` tool above instead.
+
+## Method: stop_monitoring
+
+When the user asks to **stop / pause / turn off / disable** the continuous monitoring (e.g. "stop
+watching", "stop ironguard", "stop scanning my repos", "para el monitoreo"), run **one** `shell`
+command:
+```
+bash __IRONGUARD_HOME__/watch.sh stop
+```
+This removes the 5-minute cron **and** stops the dashboard server. Confirm to the user that
+monitoring is stopped (the scan history is preserved in SQLite). To resume later, use the
+`watch_workspace` method above.
